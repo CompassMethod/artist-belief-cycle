@@ -226,7 +226,8 @@ body {
     <polyline points="22,24 13,32 22,28 31,32 22,24" fill="none" stroke="var(--white)" stroke-width="1.3" stroke-linejoin="round"/>
     <line x1="22" y1="32" x2="22" y2="36" stroke="var(--white)" stroke-width="1.3"/>
   </svg>
-  <span class="header-text mono">EKŌ System <span class="header-dot">·</span> <span class="header-sub">Powered by Compass Method</span></span>
+  <span class="header-text mono" style="flex:1">EKŌ System <span class="header-dot">·</span> <span class="header-sub">Powered by Compass Method</span></span>
+  <button class="btn-ghost small" id="header-back" style="display:none;font-size:0.85rem;color:var(--accent);padding:0.25rem 0.75rem" onclick="goBack()">← Back</button>
 </div>
 
 <!-- ── WELCOME ── -->
@@ -288,7 +289,6 @@ body {
 
 <!-- ── MODULE ── -->
 <div class="screen paged has-header" id="module" style="padding-top:120px">
-  <button class="btn-ghost small" onclick="goTo('cycle')">← Back to cycle</button>
   <div class="gap-lg"></div>
   <p class="label-accent mono" id="mod-window"></p>
   <h2 class="title-sm" id="mod-label" style="margin-top:0.25rem"></h2>
@@ -299,7 +299,6 @@ body {
 
 <!-- ── LESSON ── -->
 <div class="screen paged has-header" id="lesson" style="padding-top:120px">
-  <button class="btn-ghost small" onclick="goTo('module')">← Back to module</button>
   <div class="gap-lg"></div>
   <h2 class="title-md" id="lesson-title" style="margin-bottom:1.5rem"></h2>
   <div id="lesson-video"></div>
@@ -387,7 +386,15 @@ function goTo(screen) {
     currentScreen = screen;
     const next = document.getElementById(screen);
     const header = document.getElementById('header');
+    const headerBack = document.getElementById('header-back');
     header.classList.toggle('show', screen !== 'welcome');
+    // Show back button on module and lesson screens
+    if (screen === 'module' || screen === 'lesson') {
+      headerBack.style.display = 'inline-block';
+      headerBack.textContent = screen === 'module' ? '← Back to cycle' : '← Back to module';
+    } else {
+      headerBack.style.display = 'none';
+    }
     if (screen === 'assess') renderAssessment();
     if (screen === 'result') renderResult();
     if (screen === 'cycle') renderCycle();
@@ -396,6 +403,11 @@ function goTo(screen) {
     next.classList.add('active');
     requestAnimationFrame(() => requestAnimationFrame(() => next.classList.add('visible')));
   }, 250);
+}
+
+function goBack() {
+  if (currentScreen === 'lesson') goTo('module');
+  else if (currentScreen === 'module') goTo('cycle');
 }
 
 /* ══════════════════════════════════════════════════════════════
