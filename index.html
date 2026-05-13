@@ -52,9 +52,14 @@ body {
   justify-content: center;
   padding: 2rem;
 }
+.screen.centered.has-header {
+  justify-content: flex-start;
+  padding-top: 100px;
+}
 .screen.paged {
   flex-direction: column;
   padding: 2rem;
+  padding-top: 100px;
   max-width: 600px;
   margin: 0 auto;
 }
@@ -73,7 +78,7 @@ body {
 .header-text { font-size: 0.8rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
 .header-sub { font-size: 0.65rem; letter-spacing: 0.08em; }
 .header-dot { color: var(--border); }
-.has-header { padding-top: 80px; }
+.has-header { }
 
 /* ── Typography ── */
 .label { font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); }
