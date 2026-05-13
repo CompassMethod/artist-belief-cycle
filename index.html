@@ -9,18 +9,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg:          #0d0d0b;
-  --surface:     #161613;
-  --surface-hov: #1e1e1a;
-  --border:      #2a2a25;
-  --text:        #e0ddd5;
-  --text-muted:  #8a8778;
+  --bg:          #ffffff;
+  --surface:     #f7f7f5;
+  --surface-hov: #eeede9;
+  --border:      #e0dfdb;
+  --text:        #2c2c2c;
+  --text-muted:  #888882;
   --accent:      #00b870;
-  --accent-dim:  #00b87022;
-  --accent-soft: #00b87044;
-  --accent-hover:#00d484;
-  --white:       #f5f3ee;
-  --warm:        #c4b99a;
+  --accent-dim:  #00b87015;
+  --accent-soft: #00b87030;
+  --accent-hover:#00a060;
+  --white:       #1a1a1a;
+  --warm:        #8a7d65;
   --red:         #c45a4a;
 }
 
@@ -64,7 +64,7 @@ body {
   position: fixed; top: 0; left: 0; right: 0; z-index: 10;
   display: none; align-items: center; gap: 0.75rem;
   padding: 1rem 1.5rem;
-  background: rgba(13,13,11,0.92);
+  background: rgba(255,255,255,0.92);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--border);
@@ -437,13 +437,24 @@ function renderResult() {
    CYCLE DIAGRAM
    ══════════════════════════════════════════════════════════════ */
 function renderCycle() {
-  const cx=175,cy=175,r=130;
+  const cx=250,cy=250,r=140;
   const nodes=[{l:"BELIEVE",a:-90},{l:"SAY",a:-18},{l:"SEE",a:54},{l:"ACT",a:126},{l:"EXPERIENCE",a:198}];
   const p=(a)=>({x:cx+r*Math.cos(a*Math.PI/180),y:cy+r*Math.sin(a*Math.PI/180)});
+  const pOuter=(a,offset)=>({x:cx+(r+offset)*Math.cos(a*Math.PI/180),y:cy+(r+offset)*Math.sin(a*Math.PI/180)});
 
-  let svg = `<svg viewBox="0 0 350 350" style="width:350px;max-width:85vw;height:auto">`;
-  svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--border)" stroke-width="6"/>`;
+  // Window label positions and text (midpoint of each arc, pushed outward)
+  const windowLabels = [
+    {midA:-54, lines:["Habit &","Choice"], action:"WIDEN"},
+    {midA:18, lines:["Possibility &","Opportunity"], action:null},
+    {midA:90, lines:["Decisiveness",""], action:"SHORTEN"},
+    {midA:162, lines:["Persistence &","Patience"], action:null},
+    {midA:234, lines:["Reflection &","Reinforcement"], action:null},
+  ];
 
+  let svg = `<svg viewBox="0 0 500 500" style="width:720px;max-width:95vw;height:auto">`;
+  svg += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--border)" stroke-width="5"/>`;
+
+  // Draw arc segments
   WINDOWS.forEach((w,i) => {
     const s=p(nodes[i].a+10), e=p(nodes[(i+1)%5].a-10);
     const a1=(nodes[i].a+10)*Math.PI/180, a2=(nodes[(i+1)%5].a-10)*Math.PI/180;
@@ -454,11 +465,34 @@ function renderCycle() {
       onclick="${w.unlocked?`selectWindow(${i})`:''}"/>`;
   });
 
+  // Draw window labels outside the circle
+  windowLabels.forEach((wl,i) => {
+    const lp = pOuter(wl.midA, 38);
+    const anchor = wl.midA > -90 && wl.midA < 90 ? 'start' : wl.midA > 90 && wl.midA < 270 ? 'end' : 'middle';
+    const adjustedAnchor = Math.abs(wl.midA) === 90 || wl.midA === 270 ? 'middle' : anchor;
+
+    // "The Window of" prefix
+    svg += `<text x="${lp.x}" y="${lp.y - 8}" text-anchor="${adjustedAnchor}" fill="var(--text-muted)" font-size="7.5" font-family="'DM Mono',monospace" letter-spacing="0.06em">The Window of</text>`;
+    // Window name line 1
+    svg += `<text x="${lp.x}" y="${lp.y + 5}" text-anchor="${adjustedAnchor}" fill="var(--white)" font-size="9" font-weight="600" font-family="'Instrument Sans',sans-serif">${wl.lines[0]}</text>`;
+    // Window name line 2 (if exists)
+    if (wl.lines[1]) {
+      svg += `<text x="${lp.x}" y="${lp.y + 17}" text-anchor="${adjustedAnchor}" fill="var(--white)" font-size="9" font-weight="600" font-family="'Instrument Sans',sans-serif">${wl.lines[1]}</text>`;
+    }
+    // Action label (WIDEN / SHORTEN) - positioned inside the circle
+    if (wl.action) {
+      const ap = pOuter(wl.midA, -22);
+      svg += `<text x="${ap.x}" y="${ap.y}" text-anchor="middle" fill="var(--accent)" font-size="7" font-weight="600" font-family="'DM Mono',monospace" letter-spacing="0.2em">${wl.action}</text>`;
+    }
+  });
+
+  // Draw nodes
   nodes.forEach(n => {
     const pos = p(n.a);
     svg += `<circle cx="${pos.x}" cy="${pos.y}" r="5" fill="var(--bg)" stroke="var(--accent)" stroke-width="1.5"/>`;
-    svg += `<text x="${pos.x}" y="${pos.y-12}" text-anchor="middle" fill="var(--white)" font-size="9.5" font-weight="600" font-family="'DM Mono',monospace" letter-spacing="0.1em">${n.l}</text>`;
+    svg += `<text x="${pos.x}" y="${pos.y-14}" text-anchor="middle" fill="var(--white)" font-size="10" font-weight="600" font-family="'DM Mono',monospace" letter-spacing="0.1em">${n.l}</text>`;
   });
+
   svg += `</svg>`;
   document.getElementById('cycle-svg').innerHTML = svg;
 
